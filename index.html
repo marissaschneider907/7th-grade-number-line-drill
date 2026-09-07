@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AK STAR Number Line Mastery Drill</title>
+<style>
+:root{
+ --bg:#f6f7fb;--panel:#fff;--card:#f0f2f7;--text:#1f2937;--muted:#667085;
+ --border:#d0d5dd;--accent:#2563eb;--good:#137333;--bad:#b42318;--blue:#1d4ed8
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:920px;margin:0 auto;padding:20px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
+h1{font-size:28px;margin:0 0 8px} h2{margin:0 0 8px}
+.muted{color:var(--muted)} .small{font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--card);border-radius:10px;padding:10px;text-align:center}
+label{display:block;font-size:14px;font-weight:700;margin-bottom:6px}
+input,select{width:100%;min-height:44px;font:inherit;border:1px solid var(--border);border-radius:10px;padding:10px;background:#fff}
+button{font:inherit;min-height:46px;border-radius:10px;border:1px solid var(--border);padding:10px 14px;background:#fff;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+button:disabled{opacity:.6;cursor:not-allowed}
+.bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:8px}
+.bar>div{height:100%;background:var(--accent);width:0}
+.scroll{overflow-x:auto}
+svg{width:100%;min-width:660px;height:auto}
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.choice{font-size:19px;font-weight:700;text-align:left}
+.feedback{margin-top:14px;padding:14px;border-radius:10px;background:var(--card);min-height:66px}
+.good{border-left:5px solid var(--good)} .bad{border-left:5px solid var(--bad)}
+.hidden{display:none!important}
+.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.summary>div{background:var(--card);padding:12px;border-radius:10px}
+.grade{font-size:56px;font-weight:800;margin:8px 0}
+.notice{padding:12px;border-radius:10px;background:#fff7ed;border:1px solid #fed7aa;margin-top:12px}
+@media(max-width:680px){.wrap{padding:12px}.grid3,.stats,.choices,.summary{grid-template-columns:1fr}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="loginPanel" class="panel">
+ <h1>AK STAR Number Line Mastery Drill</h1>
+ <p class="muted">Practice interpreting two-arrow number line models like those used on the AK STAR assessment.</p>
+
+ <div class="grid3">
+   <div><label for="studentName">Student name</label><input id="studentName" autocomplete="name"></div>
+   <div><label for="studentDate">Date</label><input id="studentDate" type="date"></div>
+   <div><label for="studentClass">Class</label>
+     <select id="studentClass">
+       <option value="">Choose class</option>
+       <option>7th Grade Math - Period 1</option>
+       <option>7th Grade Math - Period 2</option>
+       <option>7th Grade Math - Period 3</option>
+       <option>7th Grade Math - Period 4</option>
+       <option>7th Grade Math - Period 5</option>
+       <option>7th Grade Math - Period 6</option>
+       <option>7th Grade Math - Period 7</option>
+       <option>7th Grade Math - Period 8</option>
+     </select>
+   </div>
+ </div>
+
+ <p class="small muted" style="margin-top:12px">
+   Mastery = at least 16 correct out of your most recent 20 questions (80%).
+   You must answer at least 20 questions. If mastery is not reached, the drill continues up to 30 questions.
+ </p>
+ <button id="startBtn" class="primary" style="width:100%">Start Practice</button>
+</section>
+
+<section id="gamePanel" class="hidden">
+ <div class="panel">
+   <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+     <div><strong id="studentLabel"></strong><div class="small muted" id="classLabel"></div></div>
+     <div class="small muted">AK STAR-style two-arrow model</div>
+   </div>
+   <div class="stats" style="margin-top:12px">
+     <div class="stat"><span class="muted small">Question</span><br><strong id="qnum">1</strong></div>
+     <div class="stat"><span class="muted small">Correct</span><br><strong id="correct">0</strong></div>
+     <div class="stat"><span class="muted small">Accuracy</span><br><strong id="accuracy">0%</strong></div>
+     <div class="stat"><span class="muted small">Recent 20</span><br><strong id="mastery">0/20</strong></div>
+   </div>
+   <div class="bar"><div id="masteryBar"></div></div>
+ </div>
+
+ <div class="panel">
+   <h2 style="font-size:20px">Which expression is equivalent to the number line model?</h2>
+   <p class="muted small">Read the lower arrow first. Then read the upper arrow.</p>
+
+   <div class="scroll">
+     <svg id="numberLine" viewBox="0 0 760 235" aria-label="Two-arrow number line model"></svg>
+   </div>
+
+   <div id="choices" class="choices"></div>
+   <div id="feedback" class="feedback" aria-live="polite">Choose an answer.</div>
+   <button id="nextBtn" class="primary hidden" style="width:100%;margin-top:12px">Next Question</button>
+ </div>
+</section>
+
+<section id="resultPanel" class="panel hidden">
+ <h1>Practice Complete</h1>
+ <p id="resultStudent" class="muted"></p>
+ <div class="grade" id="finalGrade">0%</div>
+ <p id="masteryMessage"></p>
+
+ <div class="summary">
+   <div><span class="muted small">Questions answered</span><br><strong id="finalAttempts"></strong></div>
+   <div><span class="muted small">Correct answers</span><br><strong id="finalCorrect"></strong></div>
+   <div><span class="muted small">Overall accuracy</span><br><strong id="finalAccuracy"></strong></div>
+   <div><span class="muted small">Recent 20 accuracy</span><br><strong id="finalRecent"></strong></div>
+ </div>
+
+ <div id="submissionStatus" class="notice"></div>
+ <button id="restartBtn" class="primary" style="width:100%;margin-top:14px">New Student</button>
+</section>
+</div>
+
+<script>
+// TEACHER SETUP:
+// Paste your deployed Google Apps Script Web App URL between the quotation marks below.
+const GRADEBOOK_URL = "https://script.google.com/macros/s/AKfycbz90XKnAZHVudYkG3VOUPkMCJ2tlzc59GlSBx8HL05wEyHBrtndMBcO1idTetqLO0u4LA/exec";
+
+(() => {
+ const byId=id=>document.getElementById(id);
+ const login=byId('loginPanel'), game=byId('gamePanel'), result=byId('resultPanel');
+ const svg=byId('numberLine'), choices=byId('choices'), feedback=byId('feedback'), nextBtn=byId('nextBtn');
+
+ const t=new Date();
+ byId('studentDate').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+
+ let student={name:'',date:'',className:''};
+ let attempts=0,correct=0,recent=[],answered=false,current=null;
+
+ const MIN_ATTEMPTS=20;
+ const MAX_ATTEMPTS=30;
+ const MASTERY_CORRECT=16;
+
+ function fmt(n){ return Number.isInteger(n)?String(n):n.toFixed(1); }
+ function addForm(a,b){ return b<0 ? `${fmt(a)} + (${fmt(b)})` : `${fmt(a)} + ${fmt(b)}`; }
+ function subForm(a,b){ return `${fmt(a)} - ${fmt(Math.abs(b))}`; }
+ function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+ function generateProblem(){
+   const vals=[-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0.5,1,1.5,2,2.5,3,3.5,4,4.5];
+   let a,b,end;
+   do{
+     a=rand(vals); b=rand(vals); end=a+b;
+   }while(end<-5 || end>5 || a===0 || b===0);
+   return {a,b,end};
+ }
+
+ function start(){
+   const name=byId('studentName').value.trim(), date=byId('studentDate').value, cls=byId('studentClass').value;
+   if(!name || !date || !cls){ alert('Please enter your name, date, and class.'); return; }
+   student={name,date,className:cls};
+   attempts=0;correct=0;recent=[];
+   byId('studentLabel').textContent=name;
+   byId('classLabel').textContent=`${cls} • ${date}`;
+   login.classList.add('hidden'); result.classList.add('hidden'); game.classList.remove('hidden');
+   newQuestion();
+ }
+
+ function drawModel(a,b){
+   const firstEnd=a, secondEnd=a+b;
+   const min=Math.floor(Math.min(0,firstEnd,secondEnd)-1);
+   const max=Math.ceil(Math.max(0,firstEnd,secondEnd)+1);
+   const range=max-min;
+   const x=n=>80+(n-min)/range*600;
+
+   let h='<defs><marker id="akArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#1d4ed8"/></marker></defs>';
+   h+='<line x1="58" y1="168" x2="702" y2="168" stroke="#1f2937" stroke-width="2"/>';
+   h+='<path d="M58 168 l10 -5 l0 10 z" fill="#1f2937"/><path d="M702 168 l-10 -5 l0 10 z" fill="#1f2937"/>';
+
+   for(let n=min;n<=max;n+=0.5){
+     const major=Math.abs(n-Math.round(n))<.001;
+     h+=`<line x1="${x(n)}" y1="${major?154:159}" x2="${x(n)}" y2="${major?182:177}" stroke="#1f2937" stroke-width="${major?2:1}"/>`;
+     if(major) h+=`<text x="${x(n)}" y="207" text-anchor="middle" font-size="16" fill="#1f2937">${fmt(n)}</text>`;
+   }
+
+   // Lower arrow: starts at 0 and represents the first number.
+   h+=`<circle cx="${x(0)}" cy="128" r="6" fill="#1d4ed8"/>`;
+   h+=`<line x1="${x(0)}" y1="128" x2="${x(firstEnd)}" y2="128" stroke="#1d4ed8" stroke-width="4" marker-end="url(#akArrow)"/>`;
+
+   // Upper arrow: starts at first endpoint and represents the second number.
+   h+=`<circle cx="${x(firstEnd)}" cy="87" r="6" fill="#1d4ed8"/>`;
+   h+=`<line x1="${x(firstEnd)}" y1="87" x2="${x(secondEnd)}" y2="87" stroke="#1d4ed8" stroke-width="4" marker-end="url(#akArrow)"/>`;
+
+   svg.innerHTML=h;
+ }
+
+ function makeChoices(a,b){
+   // Correct expression is intentionally shown sometimes as equivalent subtraction,
+   // matching the AK STAR prompt style.
+   const correctExpr = (b<0 && Math.random()<0.6) ? subForm(a,b) : addForm(a,b);
+
+   const candidates=[
+     correctExpr,
+     addForm(-a,b),
+     addForm(a,-b),
+     b<0 ? addForm(a,Math.abs(b)) : subForm(a,b),
+     `${fmt(Math.abs(b))} ${b<0?'-':'+'} ${fmt(Math.abs(a))}`
+   ];
+
+   const opts=[];
+   for(const c of candidates){
+     if(!opts.includes(c)) opts.push(c);
+     if(opts.length===4) break;
+   }
+   while(opts.length<4) opts.push(`${fmt(a+1)} + ${fmt(Math.abs(b))}`);
+   opts.sort(()=>Math.random()-.5);
+
+   choices.innerHTML='';
+   for(const text of opts){
+     const btn=document.createElement('button');
+     btn.className='choice';
+     btn.textContent=text;
+     btn.addEventListener('click',()=>answer(text,btn,correctExpr,a,b));
+     choices.appendChild(btn);
+   }
+ }
+
+ function newQuestion(){
+   answered=false;
+   nextBtn.classList.add('hidden');
+   feedback.className='feedback';
+   feedback.textContent='Choose an answer.';
+   current=generateProblem();
+   byId('qnum').textContent=attempts+1;
+   drawModel(current.a,current.b);
+   makeChoices(current.a,current.b);
+ }
+
+ function answer(selected,button,correctExpr,a,b){
+   if(answered)return;
+   answered=true;
+   attempts++;
+   const isCorrect=selected===correctExpr;
+   if(isCorrect){correct++;recent.push(1);} else recent.push(0);
+   if(recent.length>20) recent.shift();
+
+   choices.querySelectorAll('button').forEach(x=>x.disabled=true);
+
+   const firstDir=a>0?'right':'left';
+   const secondDir=b>0?'right':'left';
+   const end=a+b;
+
+   if(isCorrect){
+     feedback.className='feedback good';
+     feedback.innerHTML=`<strong>Correct.</strong> The lower arrow starts at 0 and moves ${fmt(Math.abs(a))} units ${firstDir} to ${fmt(a)}. The upper arrow starts at ${fmt(a)} and moves ${fmt(Math.abs(b))} units ${secondDir}, ending at ${fmt(end)}.`;
+   }else{
+     feedback.className='feedback bad';
+     feedback.innerHTML=`<strong>Incorrect.</strong> Read the arrows in order. The lower arrow goes from 0 to <strong>${fmt(a)}</strong>, so the first number is ${fmt(a)}. The upper arrow starts at ${fmt(a)} and moves ${fmt(Math.abs(b))} units <strong>${secondDir}</strong>, so the second number is ${fmt(b)}. A matching expression is <strong>${correctExpr}</strong>.`;
+     button.style.opacity='.6';
+   }
+
+   updateStats();
+
+   const recentCorrect=recent.reduce((s,v)=>s+v,0);
+   const mastered=attempts>=MIN_ATTEMPTS && recent.length===20 && recentCorrect>=MASTERY_CORRECT;
+
+   if(mastered || attempts>=MAX_ATTEMPTS){
+     nextBtn.textContent='See My Grade';
+     nextBtn.onclick=finish;
+   }else{
+     nextBtn.textContent='Next Question';
+     nextBtn.onclick=newQuestion;
+   }
+   nextBtn.classList.remove('hidden');
+ }
+
+ function updateStats(){
+   const acc=attempts?Math.round(correct/attempts*100):0;
+   const recentCorrect=recent.reduce((s,v)=>s+v,0);
+   byId('correct').textContent=correct;
+   byId('accuracy').textContent=acc+'%';
+   byId('mastery').textContent=`${recentCorrect}/${Math.min(20,attempts) || 20}`;
+   byId('masteryBar').style.width=Math.min(100,recentCorrect/MASTERY_CORRECT*100)+'%';
+ }
+
+ async function finish(){
+   game.classList.add('hidden');
+   result.classList.remove('hidden');
+
+   const overall=Math.round(correct/attempts*100);
+   const recentCorrect=recent.reduce((s,v)=>s+v,0);
+   const recentPct=Math.round(recentCorrect/recent.length*100);
+   const mastered=attempts>=20 && recent.length===20 && recentCorrect>=16;
+
+   byId('finalGrade').textContent=overall+'%';
+   byId('resultStudent').textContent=`${student.name} • ${student.className} • ${student.date}`;
+   byId('masteryMessage').innerHTML=mastered
+      ? '<strong>Mastery demonstrated.</strong> You earned at least 80% on your most recent 20 questions.'
+      : '<strong>More practice needed.</strong> You reached the 30-question limit before demonstrating mastery.';
+   byId('finalAttempts').textContent=attempts;
+   byId('finalCorrect').textContent=correct;
+   byId('finalAccuracy').textContent=overall+'%';
+   byId('finalRecent').textContent=recentPct+'%';
+
+   const payload={
+     timestamp:new Date().toISOString(),
+     name:student.name,
+     date:student.date,
+     class:student.className,
+     grade:overall,
+     attempts,
+     correct,
+     overallAccuracy:overall,
+     recent20Accuracy:recentPct,
+     mastery:mastered?'Yes':'No'
+   };
+
+   const status=byId('submissionStatus');
+
+   if(!GRADEBOOK_URL || GRADEBOOK_URL.includes('PASTE_YOUR')){
+     status.innerHTML='<strong>Gradebook connection needs one final setup step.</strong> Your teacher must paste the Google Apps Script Web App URL into this game file. Use the included setup guide.';
+     return;
+   }
+
+   status.textContent='Sending grade to gradebook…';
+   try{
+     await fetch(GRADEBOOK_URL,{
+       method:'POST',
+       mode:'no-cors',
+       headers:{'Content-Type':'text/plain;charset=utf-8'},
+       body:JSON.stringify(payload)
+     });
+     status.innerHTML='<strong>Grade submitted.</strong> Your teacher can retrieve the result in the Google Sheets gradebook.';
+   }catch(err){
+     status.innerHTML='<strong>Grade could not be sent.</strong> Tell your teacher before closing this page.';
+   }
+ }
+
+ byId('startBtn').addEventListener('click',start);
+ byId('restartBtn').addEventListener('click',()=>location.reload());
+})();
+</script>
+</body>
+</html>
